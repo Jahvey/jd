@@ -240,7 +240,7 @@ def make_test_set(train_start_date, train_end_date):
         # generate 时间窗口
         # actions = get_accumulate_action_feat(train_start_date, train_end_date)
         actions = None
-        for i in (1, 2, 3, 5, 7, 10, 15, 21, 30):
+        for i in reversed([1, 2, 3, 5, 7, 10, 15, 21, 30]):
             start_days = datetime.strptime(train_end_date, '%Y-%m-%d') - timedelta(days=i)
             start_days = start_days.strftime('%Y-%m-%d')
             if actions is None:
@@ -267,6 +267,11 @@ def make_train_set(train_start_date, train_end_date, test_start_date, test_end_d
     dump_path = './cache/train_set_%s_%s_%s_%s.pkl' % (train_start_date, train_end_date, test_start_date, test_end_date)
     if os.path.exists(dump_path):
         actions = pickle.load(open(dump_path))
+        users = actions[['user_id', 'sku_id']].copy()
+        labels = actions['label'].copy()
+        del actions['user_id']
+        del actions['sku_id']
+        del actions['label']
     else:
         start_days = "2016-02-01"
         user = get_basic_user_feat()
@@ -279,7 +284,7 @@ def make_train_set(train_start_date, train_end_date, test_start_date, test_end_d
         # generate 时间窗口
         # actions = get_accumulate_action_feat(train_start_date, train_end_date)
         actions = None
-        for i in (1, 2, 3, 5, 7, 10, 15, 21, 30):
+        for i in reversed([1, 2, 3, 5, 7, 10, 15, 21, 30]):
             start_days = datetime.strptime(train_end_date, '%Y-%m-%d') - timedelta(days=i)
             start_days = start_days.strftime('%Y-%m-%d')
             if actions is None:
@@ -295,13 +300,12 @@ def make_train_set(train_start_date, train_end_date, test_start_date, test_end_d
         actions = pd.merge(actions, comment_acc, how='left', on='sku_id')
         actions = pd.merge(actions, labels, how='left', on=['user_id', 'sku_id'])
         actions = actions.fillna(0)
-
-    users = actions[['user_id', 'sku_id']].copy()
-    labels = actions['label'].copy()
-    del actions['user_id']
-    del actions['sku_id']
-    del actions['label']
-
+        pickle.dump(actions, open(dump_path, 'w'))
+        users = actions[['user_id', 'sku_id']].copy()
+        labels = actions['label'].copy()
+        del actions['user_id']
+        del actions['sku_id']
+        del actions['label']
     return users, actions, labels
 
 

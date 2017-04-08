@@ -6,6 +6,9 @@ import xgboost as xgb
 from gen_feat import report
 
 
+def xgboost_with_multiply_month():
+    start_days = ['2016-03-05', '2016-03-05', '2016-03-05', '2016-02-29', '2016-03-05','2016-03-10']
+
 def xgboost_make_submission():
     train_start_date = '2016-03-10'
     train_end_date = '2016-04-11'
