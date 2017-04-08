@@ -88,16 +88,17 @@ def get_actions(start_date, end_date):
     :param end_date:
     :return: actions: pd.Dataframe
     """
-    dump_path = './cache/all_action_%s_%s.pkl' % (start_date, end_date)
+    dump_path = './cache/all_action.pkl' 
     if os.path.exists(dump_path):
         actions = pickle.load(open(dump_path))
+        actions = actions[(actions.time >= start_date) & (actions.time < end_date)]
     else:
         action_1 = get_actions_1()
         action_2 = get_actions_2()
         action_3 = get_actions_3()
         actions = pd.concat([action_1, action_2, action_3]) # type: pd.DataFrame
-        actions = actions[(actions.time >= start_date) & (actions.time < end_date)]
         pickle.dump(actions, open(dump_path, 'w'))
+        actions = actions[(actions.time >= start_date) & (actions.time < end_date)]
     return actions
 
 
