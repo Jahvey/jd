@@ -6,6 +6,7 @@ import xgboost as xgb
 from gen_feat import report
 from datetime import datetime
 from datetime import timedelta
+import numpy as np
 import pandas as pd
 
 
@@ -28,11 +29,11 @@ def xgboost_with_multiply_month():
             train_set = training_data
             labels = label
         else:
-            train_set = pd.concat([train_set, training_data])
-            labels = pd.concat([labels, label])
+            train_set = np.concatenate((train_set, training_data), axis=0)
+            labels = np.concatenate((label, labels), axis=0)
+            #train_set = pd.concat([train_set, training_data])
+            #labels = pd.concat([labels, label])
 
-        #train_set = train_set.values
-        #labels = labels.values
         X_train, X_test, y_train, y_test = train_test_split(train_set, labels, test_size=0.2, random_state=0)
         dtrain = xgb.DMatrix(X_train, label=y_train)
         dtest = xgb.DMatrix(X_test, label=y_test)
