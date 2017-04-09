@@ -31,28 +31,27 @@ def xgboost_with_multiply_month():
         else:
             train_set = np.concatenate((train_set, training_data), axis=0)
             labels = np.concatenate((label, labels), axis=0)
-            #train_set = pd.concat([train_set, training_data])
-            #labels = pd.concat([labels, label])
 
-        X_train, X_test, y_train, y_test = train_test_split(train_set, labels, test_size=0.2, random_state=0)
-        dtrain = xgb.DMatrix(X_train, label=y_train)
-        dtest = xgb.DMatrix(X_test, label=y_test)
-        param = {'learning_rate': 0.1, 'n_estimators': 1000, 'max_depth': 3,
+    X_train, X_test, y_train, y_test = train_test_split(train_set, labels, test_size=0.2, random_state=0)
+    dtrain = xgb.DMatrix(X_train, label=y_train)
+    dtest = xgb.DMatrix(X_test, label=y_test)
+    param = {'learning_rate': 0.1, 'n_estimators': 1000, 'max_depth': 3,
+
             'min_child_weight': 5, 'gamma': 0, 'subsample': 1.0, 'colsample_bytree': 0.8,
             'scale_pos_weight': 1, 'eta': 0.05, 'silent': 1, 'objective': 'binary:logistic'}
-        num_round = 1000
-        param['nthread'] = 4
-        plst = param.items()
-        plst += [('eval_metric', 'logloss')]
-        evallist = [(dtest, 'eval'), (dtrain, 'train')]
-        bst=xgb.train(plst, dtrain, num_round, evallist)
-        sub_user_index, sub_trainning_data = make_test_set(sub_start_date, sub_end_date)
-        sub_trainning_data = xgb.DMatrix(sub_trainning_data.values)
-        y = bst.predict(sub_trainning_data)
-        sub_user_index['label'] = y
-        pred = sub_user_index
-        pred['user_id'] = pred['user_id'].astype(int)
-        pred.to_csv('./sub/submission.csv', index=False, index_label=False)
+    num_round = 1000
+    param['nthread'] = 4
+    plst = param.items()
+    plst += [('eval_metric', 'logloss')]
+    evallist = [(dtest, 'eval'), (dtrain, 'train')]
+    bst=xgb.train(plst, dtrain, num_round, evallist)
+    sub_user_index, sub_trainning_data = make_test_set(sub_start_date, sub_end_date)
+    sub_trainning_data = xgb.DMatrix(sub_trainning_data.values)
+    y = bst.predict(sub_trainning_data)
+    sub_user_index['label'] = y
+    pred = sub_user_index
+    pred['user_id'] = pred['user_id'].astype(int)
+    pred.to_csv('./sub/submission.csv', index=False, index_label=False)
 
         #print train_start_date, train_end_date, test_begin_date, test_end_date
 
