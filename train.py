@@ -22,6 +22,8 @@ def xgboost_with_multiply_month():
         test_end_date = datetime.strptime(train_start_date, '%Y-%m-%d') + timedelta(days=37)
         test_end_date = test_end_date.strftime('%Y-%m-%d')
         user_index, training_data, label = make_train_set(train_start_date, train_end_date, test_start_date, test_end_date)
+        training_data = training_data.values
+        label = label.values
         if train_set is None:
             train_set = training_data
             labels = label
@@ -29,8 +31,8 @@ def xgboost_with_multiply_month():
             train_set = pd.concat([train_set, training_data])
             labels = pd.concat([labels, label])
 
-        train_set = train_set.values
-        labels = labels.values
+        #train_set = train_set.values
+        #labels = labels.values
         X_train, X_test, y_train, y_test = train_test_split(train_set, labels, test_size=0.2, random_state=0)
         dtrain = xgb.DMatrix(X_train, label=y_train)
         dtest = xgb.DMatrix(X_test, label=y_test)
