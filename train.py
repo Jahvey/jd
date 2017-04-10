@@ -32,7 +32,7 @@ def xgboost_with_multiply_month():
         else:
             train_set = np.concatenate((train_set, training_data), axis=0)
             labels = np.concatenate((label, labels), axis=0)
-
+    print train_set.shape
     X_train, X_test, y_train, y_test = train_test_split(train_set, labels, test_size=0.2, random_state=0)
     dtrain = xgb.DMatrix(X_train, label=y_train)
     dtest = xgb.DMatrix(X_test, label=y_test)
@@ -40,7 +40,7 @@ def xgboost_with_multiply_month():
 
             'min_child_weight': 5, 'gamma': 0, 'subsample': 1.0, 'colsample_bytree': 0.8,
             'scale_pos_weight': 1, 'eta': 0.05, 'silent': 1, 'objective': 'binary:logistic'}
-    num_round = 1000
+    num_round = 111
     param['nthread'] = 4
     plst = param.items()
     plst += [('eval_metric', 'logloss')]
@@ -56,7 +56,7 @@ def xgboost_with_multiply_month():
 
         #print train_start_date, train_end_date, test_begin_date, test_end_date
 
-def xgboost_make_submission():
+def xgboost_make_submission_v1():
     train_start_date = '2016-03-10'
     train_end_date = '2016-04-11'
     test_start_date = '2016-04-11'

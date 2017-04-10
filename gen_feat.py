@@ -300,6 +300,10 @@ def make_train_set(train_start_date, train_end_date, test_start_date, test_end_d
 
     if sample is not None:
         actions_pos, actions_neg = actions[actions['label'] == 1], actions[actions['label'] == 0]
+        print actions_pos.shape
+        print actions_neg.shape
+
+
         actions = pd.concat([actions_pos, actions_neg.sample(frac=sample, random_state=22)], axis=0)
         actions = shuffle(actions)
 
