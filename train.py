@@ -90,41 +90,45 @@ def xgboost_make_submission_v1():
     pred.to_csv('./sub/submission.csv', index=False, index_label=False)
 
 
-
 def xgboost_cv():
     train_start_date = '2016-03-05'
     train_end_date = '2016-04-06'
-    test_start_date = '2016-04-11'
-    test_end_date = '2016-04-16'
+    test_start_date = '2016-04-06'
+    test_end_date = '2016-04-11'
 
-    sub_start_date = '2016-02-05'
-    sub_end_date = '2016-03-05'
-    sub_test_start_date = '2016-03-05'
-    sub_test_end_date = '2016-03-10'
+    sub_start_date = '2016-03-15'
+    sub_end_date = '2016-04-16'
+    sub_test_start_date = '2016-04-11'
+    sub_test_end_date = '2016-04-16'
 
     user_index, training_data, label = make_train_set(train_start_date, train_end_date, test_start_date, test_end_date)
-    X_train, X_test, y_train, y_test = train_test_split(training_data, label, test_size=0.2, random_state=0)
-    dtrain=xgb.DMatrix(X_train, label=y_train)
-    dtest=xgb.DMatrix(X_test, label=y_test)
-    param = {'max_depth': 10, 'eta': 0.05, 'silent': 1, 'objective': 'binary:logistic'}
-    num_round = 4000
+    X_train, X_test, y_train, y_test = train_test_split(training_data.values, label.values, test_size=0.2,
+                                                        random_state=0)
+    dtrain = xgb.DMatrix(X_train, label=y_train)
+    dtest = xgb.DMatrix(X_test, label=y_test)
+    param = {'learning_rate': 0.1, 'n_estimators': 1000, 'max_depth': 3,
+             'min_child_weight': 5, 'gamma': 0, 'subsample': 1.0, 'colsample_bytree': 0.8,
+             'scale_pos_weight': 1, 'eta': 0.05, 'silent': 1, 'objective': 'binary:logistic'}
+    num_round = 283
     param['nthread'] = 4
-    param['eval_metric'] = "auc"
     plst = param.items()
     plst += [('eval_metric', 'logloss')]
+
     evallist = [(dtest, 'eval'), (dtrain, 'train')]
-    bst=xgb.train( plst, dtrain, num_round, evallist)
-
-    sub_user_index, sub_trainning_date, sub_label = make_train_set(sub_start_date, sub_end_date,
+    bst = xgb.train(plst, dtrain, num_round, evallist)
+    sub_user_index, sub_trainning_data, sub_label = make_train_set(sub_start_date, sub_end_date,
                                                                    sub_test_start_date, sub_test_end_date)
-    test = xgb.DMatrix(sub_trainning_date)
-    #y = bst.predict(test)
-
+    sub_trainning_data = xgb.DMatrix(sub_trainning_data.values)
+    y_pred = bst.predict(sub_trainning_data)
     pred = sub_user_index.copy()
-    y_true = sub_user_index.copy()
-    pred['label'] = y
-    y_true['label'] = label
-    report(pred, y_true)
+    pred['label'] = y_pred
+    pred = pred[pred['label'] >= 0.03].sort_values(by='label', ascending=False).groupby('user_id').first().reset_index()
+    pred = pred[['user_id', 'sku_id']]
+    pred['user_id'] = pred['user_id'].astype(int)
+
+    real = sub_user_index.copy()
+    real['label'] = sub_label
+    report(pred, real)
 
 
 if __name__ == '__main__':
