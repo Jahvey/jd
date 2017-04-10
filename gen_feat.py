@@ -304,8 +304,9 @@ def make_train_set(train_start_date, train_end_date, test_start_date, test_end_d
         print actions_neg.shape
 
 
-        actions = pd.concat([actions_pos, actions_neg.sample(frac=sample, random_state=22)], axis=0)
-        actions = shuffle(actions)
+        actions = pd.concat([actions_pos, actions_neg.sample(frac=sample, random_state=seed)], axis=0)
+        actions = shuffle(actions, random_state=seed)
+        print actions.shape
 
     users = actions[['user_id', 'sku_id']].copy()
     labels = actions['label'].copy()

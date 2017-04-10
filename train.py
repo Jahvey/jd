@@ -15,6 +15,7 @@ def xgboost_with_multiply_month():
     sub_start_date = '2016-03-15'
     sub_end_date = '2016-04-16'
     train_start_dates = ['2016-02-14', '2016-02-19', '2016-02-24', '2016-02-29', '2016-03-05', '2016-03-10']
+    #train_start_dates = ['2016-03-10']
     train_set = None
     labels = None
     for train_start_date in train_start_dates:
@@ -24,23 +25,23 @@ def xgboost_with_multiply_month():
         test_end_date = datetime.strptime(train_start_date, '%Y-%m-%d') + timedelta(days=37)
         test_end_date = test_end_date.strftime('%Y-%m-%d')
         user_index, training_data, label = make_train_set(train_start_date, train_end_date, test_start_date, test_end_date, sample=0.1, seed=22)
-        #training_data = training_data.values
-        #label = label.values #
+        training_data = training_data.values
+        label = label.values #
         if train_set is None:
             train_set = training_data
             labels = label
         else:
             train_set = np.concatenate((train_set, training_data), axis=0)
-            labels = np.concatenate((label, labels), axis=0)
+            labels = np.concatenate((labels, label), axis=0)
     print train_set.shape
     X_train, X_test, y_train, y_test = train_test_split(train_set, labels, test_size=0.2, random_state=0)
     dtrain = xgb.DMatrix(X_train, label=y_train)
     dtest = xgb.DMatrix(X_test, label=y_test)
     param = {'learning_rate': 0.1, 'n_estimators': 1000, 'max_depth': 3,
 
-            'min_child_weight': 5, 'gamma': 0, 'subsample': 1.0, 'colsample_bytree': 0.8,
+            'min_child_weight': 5, 'gamma': 0, 'subsample': 0.8, 'colsample_bytree': 0.8,
             'scale_pos_weight': 1, 'eta': 0.05, 'silent': 1, 'objective': 'binary:logistic'}
-    num_round = 111
+    num_round = 860
     param['nthread'] = 4
     plst = param.items()
     plst += [('eval_metric', 'logloss')]
@@ -54,7 +55,6 @@ def xgboost_with_multiply_month():
     pred['user_id'] = pred['user_id'].astype(int)
     pred.to_csv('./sub/submission.csv', index=False, index_label=False)
 
-        #print train_start_date, train_end_date, test_begin_date, test_end_date
 
 def xgboost_make_submission_v1():
     train_start_date = '2016-03-10'
