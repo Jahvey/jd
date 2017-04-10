@@ -11,6 +11,7 @@ import pandas as pd
 
 
 def xgboost_with_multiply_month():
+    seed = 22
     sub_start_date = '2016-03-15'
     sub_end_date = '2016-04-16'
     train_start_dates = ['2016-02-14', '2016-02-19', '2016-02-24', '2016-02-29', '2016-03-05', '2016-03-10']
@@ -22,9 +23,9 @@ def xgboost_with_multiply_month():
         test_start_date = train_end_date
         test_end_date = datetime.strptime(train_start_date, '%Y-%m-%d') + timedelta(days=37)
         test_end_date = test_end_date.strftime('%Y-%m-%d')
-        user_index, training_data, label = make_train_set(train_start_date, train_end_date, test_start_date, test_end_date)
-        training_data = training_data.values
-        label = label.values #
+        user_index, training_data, label = make_train_set(train_start_date, train_end_date, test_start_date, test_end_date, sample=0.1, seed=22)
+        #training_data = training_data.values
+        #label = label.values #
         if train_set is None:
             train_set = training_data
             labels = label

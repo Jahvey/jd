@@ -8,6 +8,7 @@ import pickle
 import os
 import math
 import numpy as np
+from sklearn.utils import shuffle
 
 action_1_path = "./data/JData_Action_201602.csv"
 action_2_path = "./data/JData_Action_201603.csv"
@@ -263,15 +264,10 @@ def make_test_set(train_start_date, train_end_date):
     del actions['sku_id']
     return users, actions
 
-def make_train_set(train_start_date, train_end_date, test_start_date, test_end_date, days=30):
+def make_train_set(train_start_date, train_end_date, test_start_date, test_end_date, sample=None, seed=22):
     dump_path = './cache/train_set_%s_%s_%s_%s.pkl' % (train_start_date, train_end_date, test_start_date, test_end_date)
     if os.path.exists(dump_path):
         actions = pickle.load(open(dump_path))
-        users = actions[['user_id', 'sku_id']].copy()
-        labels = actions['label'].copy()
-        del actions['user_id']
-        del actions['sku_id']
-        del actions['label']
     else:
         start_days = "2016-02-01"
         user = get_basic_user_feat()
@@ -301,11 +297,17 @@ def make_train_set(train_start_date, train_end_date, test_start_date, test_end_d
         actions = pd.merge(actions, labels, how='left', on=['user_id', 'sku_id'])
         actions = actions.fillna(0)
         pickle.dump(actions, open(dump_path, 'w'))
-        users = actions[['user_id', 'sku_id']].copy()
-        labels = actions['label'].copy()
-        del actions['user_id']
-        del actions['sku_id']
-        del actions['label']
+
+    if sample is not None:
+        actions_pos, actions_neg = actions[actions['label'] == 1], actions[actions['label'] == 0]
+        actions = pd.concat([actions_pos, actions_neg.sample(frac=sample, random_state=22)], axis=0)
+        actions = shuffle(actions)
+
+    users = actions[['user_id', 'sku_id']].copy()
+    labels = actions['label'].copy()
+    del actions['user_id']
+    del actions['sku_id']
+    del actions['label']
     return users, actions, labels
 
 
